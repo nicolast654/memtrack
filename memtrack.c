@@ -8,26 +8,22 @@ char init_data[4096]; // temp buffer that dlsym uses
 
 void *malloc(size_t);
 
+/*
+ * Function that gets called as soon as shared object is loaded.
+ * It gets a pointer to the real libc malloc function.printf
+ * initialization is being set to 1 before dlsym and 0 after bc dlsym uses malloc and needs the data block.
+ */
 __attribute__((constructor))
 void init() {
-    write(1, "Before init\n", 13);
     initialization = 1;
     malloc_ptr = dlsym(RTLD_NEXT, "malloc");
-    if (malloc_ptr) {
-        write(1, "malloc ptr is set\n", 19);
-    } else {
-        write(1, "malloc ptr is nul\n", 19);
-    }
     initialization = 0;
 }
 
 void *malloc(size_t size) {
     if (initialization) {
-        write(1, "init\n", 6);
         return init_data;
     }
-    write(1, "Before malloc\n", 15);
     void *output = (*malloc_ptr)(size);
-    write(1, "After malloc\n", 14);
     return output;
 }
