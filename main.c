@@ -3,7 +3,7 @@
 
 int main() {
     int *test  = malloc(sizeof(int) * 3);
-    printf("malloced in main\n");
+    // printf("malloced in main\n");
     free(test);
     return 0;
 }

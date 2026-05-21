@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "hashmap.h"
+
 void* (*malloc_ptr)(size_t) = NULL; // function pointer that returns a void* and takes size_t
 void (*free_ptr)(void *) = NULL;
 
@@ -28,6 +30,7 @@ void *malloc(size_t size) {
         return init_data;
     }
     void *output = (*malloc_ptr)(size);
+    hashmap_set(output, size);
     return output;
 }
 
@@ -35,6 +38,17 @@ void free(void *ptr) {
     if (initialization) {
         return; // small mem leak, but needed
     }
-    write(1, "Free2!\n",8);
+    hashmap_delete(ptr);
     (*free_ptr)(ptr);
 }
+
+
+__attribute__((destructor))
+void print_leaks() {
+    for (int i = 0; i < HASHMAP_SIZE; i++) {
+        if (hashmap[i].address != NULL) {
+            write(1, "LEAK DETECTED\n", 15);
+        }
+    }
+}
+
