@@ -14,4 +14,5 @@ object_t hashmap_get(void *address);
 void hashmap_set(void *address, size_t size);
 void hashmap_delete(void *address);
 
+extern object_t hashmap[HASHMAP_SIZE];
 #endif

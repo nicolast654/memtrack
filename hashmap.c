@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-object_t hashmap[HASHMAP_SIZE] = {};
+object_t hashmap[HASHMAP_SIZE] = {0};
 
-inline int hash(void *address) {
+int hash(void *address) {
     uintptr_t addr_int = (uintptr_t)address;
     return (addr_int * 5 + 9 % 65537) % HASHMAP_SIZE;
 }
