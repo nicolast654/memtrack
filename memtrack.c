@@ -73,16 +73,22 @@ void free(void *ptr) {
 __attribute__((destructor))
 void print_leaks() {
     int leaks = 0;
+    int byte_leaks = 0;
     for (int i = 0; i < HASHMAP_SIZE; i++) {
         if (hashmap[i].address != NULL) {
             leaks++;
+            byte_leaks += hashmap[i].size;
         }
     }
     char leaks_str[6] = {}; // assuming we will never have more than 999999 leaks
+    char bytes_leaked_str[9] = {};
+
+    write_int_to_buffer(byte_leaks, bytes_leaked_str);
     write_int_to_buffer(leaks, leaks_str);
-    for (int i = 0; leaks_str[i] != '\0'; ++i) {
-        write(2, &leaks_str[i], 1);
-    }
-    write(2, " memory leaks detected!\n", 24);
+
+    write_str(2, bytes_leaked_str);
+    write(2, " bytes leaked accross ", 22);
+    write_str(2, leaks_str);
+    write(2, " memory leaks!\n", 15);
 }
 

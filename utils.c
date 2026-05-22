@@ -1,5 +1,7 @@
 #include "utils.h"
 
+#include <unistd.h>
+
 // assumes buffer is large enough to store int
 void write_int_to_buffer(int num, char *buff) {
     int power = 1;
@@ -16,3 +18,8 @@ void write_int_to_buffer(int num, char *buff) {
     buff[count] = '\0';
 }
 
+void write_str(int fd, const char *buff) {
+    for (int i = 0; buff[i] != '\0'; ++i) {
+        write(fd, &buff[i], 1);
+    }
+}
