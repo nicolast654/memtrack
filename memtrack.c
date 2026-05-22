@@ -7,6 +7,8 @@
 
 void* (*malloc_ptr)(size_t) = NULL; // function pointer that returns a void* and takes size_t
 void (*free_ptr)(void *) = NULL;
+void* (*calloc_ptr)(size_t, size_t) = NULL;
+void* (*realloc_ptr)(void *, size_t) = NULL;
 
 int initialization = 0;
 char init_data[4096]; // temp buffer that dlsym uses
@@ -23,6 +25,8 @@ void init() {
     initialization = 1;
     malloc_ptr = dlsym(RTLD_NEXT, "malloc");
     free_ptr = dlsym(RTLD_NEXT, "free");
+    calloc_ptr = dlsym(RTLD_NEXT, "calloc");
+    realloc_ptr = dlsym(RTLD_NEXT, "realloc");
     initialization = 0;
 }
 
@@ -35,6 +39,29 @@ void *malloc(size_t size) {
     return output;
 }
 
+void *calloc(size_t nmemb, size_t size) {
+    if (initialization) {
+        return init_data;
+    }
+    void *output = (*calloc_ptr)(nmemb, size);
+    hashmap_set(output, nmemb * size);
+    return output;
+}
+
+void *realloc(void *ptr, size_t size) {
+    if (initialization) {
+        return init_data;
+    }
+    void *output = (*realloc_ptr)(ptr, size);
+    if (ptr != NULL) {
+        hashmap_delete(ptr);
+    }
+    if (size != 0) {
+        hashmap_set(output, size);
+    }
+    return output;
+}
+
 void free(void *ptr) {
     if (initialization) {
         return; // small mem leak, but needed
@@ -42,7 +69,6 @@ void free(void *ptr) {
     hashmap_delete(ptr);
     (*free_ptr)(ptr);
 }
-
 
 __attribute__((destructor))
 void print_leaks() {
