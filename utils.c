@@ -3,7 +3,7 @@
 // assumes buffer is large enough to store int
 void write_int_to_buffer(int num, char *buff) {
     int power = 1;
-    while (num / power > 10) {
+    while (num / power >= 10) {
         power *= 10;
     }
 

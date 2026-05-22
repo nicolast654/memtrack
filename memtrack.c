@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "hashmap.h"
+#include "utils.h"
 
 void* (*malloc_ptr)(size_t) = NULL; // function pointer that returns a void* and takes size_t
 void (*free_ptr)(void *) = NULL;
@@ -45,10 +46,17 @@ void free(void *ptr) {
 
 __attribute__((destructor))
 void print_leaks() {
+    int leaks = 0;
     for (int i = 0; i < HASHMAP_SIZE; i++) {
         if (hashmap[i].address != NULL) {
-            write(1, "LEAK DETECTED\n", 15);
+            leaks++;
         }
     }
+    char leaks_str[6] = {}; // assuming we will never have more than 999999 leaks
+    write_int_to_buffer(leaks, leaks_str);
+    for (int i = 0; leaks_str[i] != '\0'; ++i) {
+        write(2, &leaks_str[i], 1);
+    }
+    write(2, " memory leaks detected!\n", 24);
 }
 
