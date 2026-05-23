@@ -25,53 +25,39 @@ void *malloc(size_t);
  */
 __attribute__((constructor))
 void init() {
-    write(2, "start\n", 7);
     initialization = 1;
     malloc_ptr = dlsym(RTLD_NEXT, "malloc");
     free_ptr = dlsym(RTLD_NEXT, "free");
     calloc_ptr = dlsym(RTLD_NEXT, "calloc");
     realloc_ptr = dlsym(RTLD_NEXT, "realloc");
 
-    write(2, "1\n", 3);
 
     /* since man page says: backtrace() don't call malloc() explicitly, but they are part of
      * libgcc, which gets loaded dynamically when first used.  Dynamic loading usually triggers
      * a call to malloc(3). If you need certain calls to these two functions to not allocate memory
      * (in signal handlers,  for example), you need to make sure libgcc is loaded beforehand. */
-    write(2, "2\n", 3);
     void *b[16];
-    write(2, "3\n", 3);
     int _ = backtrace(b, 1);
-    write(2, "end\n", 5);
     initialization = 0;
 }
 
 void *malloc(size_t size) {
-    write(2, "m\n", 3);
     if (initialization) {
-        write(2, "here: ", 7);
-    char x[6];
-    write_int_to_buffer(offset, x);
-    write_str(2, x);
         offset += size;
         return init_data + offset - size;
     }
     void *output = (*malloc_ptr)(size);
 
-    write(2, "1\n", 3);
     void *bt[MAX_BACKTRACE] = {};
     int bt_count = backtrace(bt, MAX_BACKTRACE);
-    write(2, "2\n", 3);
 
     hashmap_set(output, size, bt_count, bt);
     return output;
 }
 
 void *calloc(size_t nmemb, size_t size) {
-    write(2, "c\n", 3);
     if (initialization) {
         offset += size * nmemb;
-        write(2, "here2\n", 7);
         return init_data + offset - size * nmemb;
     }
     void *output = (*calloc_ptr)(nmemb, size);
@@ -84,7 +70,6 @@ void *calloc(size_t nmemb, size_t size) {
 }
 
 void *realloc(void *ptr, size_t size) {
-    write(2, "r\n", 3);
     if (initialization) {
         offset += size;
         return init_data + offset - size;

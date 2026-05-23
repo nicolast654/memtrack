@@ -4,7 +4,7 @@ CC := gcc
 all: memtrack.so main
 
 memtrack.so: memtrack.c hashmap.o utils.o
-	${CC} -g -fPIC -shared -o memtrack.so hashmap.o utils.o memtrack.c
+	${CC} -fPIC -shared -o memtrack.so hashmap.o utils.o memtrack.c
 
 hashmap.o: hashmap.c hashmap.h
 	${CC} -c -fPIC hashmap.c
