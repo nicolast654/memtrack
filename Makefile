@@ -13,7 +13,7 @@ utils.o: utils.c utils.h
 	${CC} -c -fPIC utils.c
 
 main: main.c
-	${CC} -o main main.c
+	${CC} -rdynamic -o main main.c
 
 .PHONY: clean
 clean:
