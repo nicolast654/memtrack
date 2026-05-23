@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 object_t hashmap[HASHMAP_SIZE] = {0};
@@ -26,7 +27,7 @@ object_t hashmap_get(void *address) {
     return output;
 }
 
-void hashmap_set(void *address, size_t size) {
+void hashmap_set(void *address, size_t size, int backtrace_count, void *backtrace[MAX_BACKTRACE]) {
     int index = hash(address);
     object_t *slot = &(hashmap[index]);
     while (slot->address != NULL && (slot->size != 0 && slot->size != (size_t)-1)) {
@@ -39,6 +40,8 @@ void hashmap_set(void *address, size_t size) {
     }
     slot->address = address;
     slot->size = size;
+    slot->backtrace_count = backtrace_count;
+    memcpy(slot->backtrace, backtrace, backtrace_count * sizeof(void *)); // can't just assign since lifespan of backtrace is gonna end with malloc (the one that calls hashmap_set)
 }
 
 void hashmap_delete(void *address) {
