@@ -104,6 +104,14 @@ void print_leaks() {
         if (hashmap[i].address != NULL) {
             leaks++;
             byte_leaks += hashmap[i].size;
+            write(2, "LEAK DETECTED:\n", 15);
+            char **trace= backtrace_symbols(hashmap[i].backtrace, hashmap[i].backtrace_count);
+            // print every item of trace
+            for (int j = 0; j < hashmap[i].backtrace_count; j++) {
+                write_str(2, trace[j]);
+                write(2, "\n", 2);
+            }
+            free(trace);
         }
     }
     char leaks_str[6] = {}; // assuming we will never have more than 999999 leaks
