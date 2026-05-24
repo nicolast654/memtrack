@@ -100,6 +100,9 @@ __attribute__((destructor))
 void print_leaks() {
     int leaks = 0;
     int byte_leaks = 0;
+    int rdynamic_needed = 0;
+    int main = 0;
+
     for (int i = 0; i < HASHMAP_SIZE; i++) {
         if (hashmap[i].address != NULL) {
             leaks++;
@@ -108,10 +111,14 @@ void print_leaks() {
             char **trace= backtrace_symbols(hashmap[i].backtrace, hashmap[i].backtrace_count);
             // print every item of trace
             for (int j = 0; j < hashmap[i].backtrace_count; j++) {
-                write_str(2, trace[j]);
+                pretty_write_fct(2, trace[j], &rdynamic_needed, &main);
                 write(2, "\n", 2);
+                if (main) {
+                    break;
+                }
             }
             free(trace);
+            main = 0;
         }
     }
     char leaks_str[6] = {}; // assuming we will never have more than 999999 leaks
@@ -124,5 +131,9 @@ void print_leaks() {
     write(2, " bytes leaked accross ", 22);
     write_str(2, leaks_str);
     write(2, " memory leaks!\n", 15);
+
+    if (rdynamic_needed) {
+        write_str(2, "Some functions name might not be displayed, make sure to compile using -rdynamic to see them\n");
+    }
 }
 

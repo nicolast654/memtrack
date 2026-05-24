@@ -1,5 +1,6 @@
 #include "utils.h"
 
+#include <string.h>
 #include <unistd.h>
 
 // assumes buffer is large enough to store int
@@ -19,7 +20,24 @@ void write_int_to_buffer(int num, char *buff) {
 }
 
 void write_str(int fd, const char *buff) {
-    for (int i = 0; buff[i] != '\0'; ++i) {
-        write(fd, &buff[i], 1);
+    int len = strlen(buff);
+    write(fd, buff, len);
+}
+
+void pretty_write_fct(int fd, const char *str, int *rdynamic, int *main) {
+    char *last_parenthesis = strrchr(str, '(');
+    if (*(last_parenthesis + 1) == '+') {
+        // next character is +, so format is: ./a.out(+0x11a1) and rdynamic wasn't used
+        *rdynamic = 1;
+        write_str(2, "in ????\n");
+        return;
+    }
+    last_parenthesis += 1; // skip the parenthesis itself
+    char *end_fct_name = strchr(last_parenthesis, '+');
+    *end_fct_name = '\0';
+    write_str(2, "  ");
+    write_str(2, last_parenthesis);
+    if (strcmp(last_parenthesis, "main") == 0) {
+        *main = 1;
     }
 }
