@@ -15,6 +15,14 @@ utils.o: utils.c utils.h
 main: main.c
 	${CC} -rdynamic -o main main.c
 
+.PHONY: install
+install: memtrack.so
+	mkdir -p /usr/local/lib/memtrack
+	cp ./memtrack.so /usr/local/lib/memtrack/memtrack.so
+	mkdir -p /usr/local/bin/
+	chmod +x  ./memtrack.sh
+	cp -p ./memtrack.sh /usr/local/bin/memtrack
+
 .PHONY: clean
 clean:
 	rm -f *.so *.o main
