@@ -1,7 +1,7 @@
 CC := gcc
 
 .PHONY: all
-all: memtrack.so main
+all: memtrack.so example
 
 memtrack.so: memtrack.c hashmap.o utils.o
 	${CC} -g -fPIC -shared -o memtrack.so hashmap.o utils.o memtrack.c
@@ -12,8 +12,8 @@ hashmap.o: hashmap.c hashmap.h
 utils.o: utils.c utils.h
 	${CC} -c -fPIC utils.c
 
-main: main.c
-	${CC} -rdynamic -o main main.c
+example: example.c
+	${CC} -rdynamic -o example example.c
 
 .PHONY: install
 install: memtrack.so
@@ -25,4 +25,4 @@ install: memtrack.so
 
 .PHONY: clean
 clean:
-	rm -f *.so *.o main
+	rm -f *.so *.o example
