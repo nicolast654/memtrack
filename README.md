@@ -44,6 +44,6 @@ This simple leak tracker has a lot of limitations:
 1. Reports all unfreed allocations at exit, not just unreachable memory. Some programs intentionally skip freeing at exit.
 2. Statically linked programs cannot be tracked since there are no malloc interpositions.
 3. Only tracks allocation made using `malloc`, `calloc`, or `realloc`, allocations using `mmap`, `brk`, `sbrk`, and other will not be reported.
-4. Assumes less than a million leaks per program.
+4. Assumes less than 65536 (current size of custom hashmap) leaks per program.
 5. Assumes that depth of function call that has leak is less than 16.
 
