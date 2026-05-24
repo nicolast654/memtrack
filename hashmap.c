@@ -18,11 +18,11 @@ object_t hashmap_get(void *address) {
     object_t output = hashmap[index];
     while (output.address != address) {
         index = (index + 1) % HASHMAP_SIZE;
-        output = hashmap[index];
-        if (index == hash(address)) {
+        if ((output.address == NULL && output.size == 0) || index == hash(address)) {
             write(2, "Error: hashmap tried to get an address that's not in it\n", 57);
             exit(1);
         }
+        output = hashmap[index];
     }
     return output;
 }
@@ -30,7 +30,7 @@ object_t hashmap_get(void *address) {
 void hashmap_set(void *address, size_t size, int backtrace_count, void *backtrace[MAX_BACKTRACE]) {
     int index = hash(address);
     object_t *slot = &(hashmap[index]);
-    while (slot->address != NULL && (slot->size != 0 && slot->size != (size_t)-1)) {
+    while (slot->address != NULL) {
         index = (index + 1) % HASHMAP_SIZE;
         slot = &(hashmap[index]);
         if (index == hash(address)) {
