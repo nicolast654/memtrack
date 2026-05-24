@@ -6,13 +6,15 @@
 #include "hashmap.h"
 #include "utils.h"
 
+#define INIT_STACK_SIZE 8192
+
 void* (*malloc_ptr)(size_t) = NULL; // function pointer that returns a void* and takes size_t
 void (*free_ptr)(void *) = NULL;
 void* (*calloc_ptr)(size_t, size_t) = NULL;
 void* (*realloc_ptr)(void *, size_t) = NULL;
 
 int initialization = 0;
-char init_data[8192]; // temp buffer that startup functions use
+char init_data[INIT_STACK_SIZE]; // temp buffer that startup functions use
 
 size_t offset = 0; // if many startup functions call malloc, each will have their own region
 
@@ -43,6 +45,10 @@ void init() {
 
 void *malloc(size_t size) {
     if (initialization) {
+        if (offset + size > INIT_STACK_SIZE) {
+            write_str(2, "ERROR: initial stack size it not sufficient");
+            _exit(1);
+        }
         offset += size;
         return init_data + offset - size;
     }
@@ -57,6 +63,10 @@ void *malloc(size_t size) {
 
 void *calloc(size_t nmemb, size_t size) {
     if (initialization) {
+        if (offset + size * nmemb > INIT_STACK_SIZE) {
+            write_str(2, "ERROR: initial stack size it not sufficient");
+            _exit(1);
+        }
         offset += size * nmemb;
         return init_data + offset - size * nmemb;
     }
@@ -71,6 +81,10 @@ void *calloc(size_t nmemb, size_t size) {
 
 void *realloc(void *ptr, size_t size) {
     if (initialization) {
+        if (offset + size > INIT_STACK_SIZE) {
+            write_str(2, "ERROR: initial stack size it not sufficient");
+            _exit(1);
+        }
         offset += size;
         return init_data + offset - size;
     }
